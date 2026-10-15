@@ -33,6 +33,7 @@ Each skill lives in the repo as `skills/<name>/` (SKILL.md + any `references/`, 
    (device_bash, root `$HOME/mnt/yair-skills/skills`), so the hashes are comparable. Pass the root as the argument.
    It normalizes `SKILL.md` frontmatter down to `name` + `description` (name defaults to the dir name), because the
    Claude side only keeps those two — otherwise a skill with Claude Code-only keys would look changed forever.
+   Quoted values are JSON-decoded, because Claude saves descriptions as `"..."` with inner quotes escaped.
 
    ```python
    import hashlib,os,sys,json,re
@@ -42,7 +43,9 @@ Each skill lives in the repo as `skills/<name>/` (SKILL.md + any `references/`, 
        kv={}
        for l in m.group(1).splitlines():
            mm=re.match(r'^(name|description):\s*(.*)$',l)
-           if mm: kv[mm.group(1)]=mm.group(2).strip().strip('"\'')
+           if mm:
+               v=mm.group(2).strip()
+               kv[mm.group(1)]=json.loads(v) if v[:1]=='"' else v.strip("'")
        kv.setdefault('name',os.path.basename(d))
        return (kv['name']+'\n'+kv.get('description','')+'\n'+t[m.end():].strip()).encode()
    root=sys.argv[1]; out={}
