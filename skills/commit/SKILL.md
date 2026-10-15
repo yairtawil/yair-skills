@@ -1,15 +1,18 @@
 ---
+name: commit
 description: Analyze current changes, then add + commit + push to the current branch, and return a link to the open PR (creating it with gh if none exists)
 allowed-tools: Bash(git status:*), Bash(git diff:*), Bash(git branch:*), Bash(git add:*), Bash(git commit:*), Bash(git push:*), Bash(git log:*), Bash(git remote:*), Bash(gh pr view:*), Bash(gh pr list:*), Bash(gh pr create:*)
 ---
 
 ## Context
 
-- Current branch: !`git branch --show-current`
-- Status: !`git status`
-- Diff (staged + unstaged): !`git diff HEAD`
-- Recent history (for style reference): !`git log --oneline -10`
-- Remote URL: !`git remote get-url origin`
+Start by running these to see what you're committing (in one Bash call is fine):
+
+- Current branch: `git branch --show-current`
+- Status: `git status`
+- Diff (staged + unstaged): `git diff HEAD`
+- Recent history (for style reference): `git log --oneline -10`
+- Remote URL: `git remote get-url origin`
 
 ## Task
 

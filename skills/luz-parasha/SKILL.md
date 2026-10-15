@@ -9,21 +9,21 @@ This skill automates the recurring job of a synagogue gabbai: take last week's p
 (a one-page Canva design) and turn it into the upcoming week's version. Most of the design — layout,
 fonts, community names, dedications, fixed prayer times — stays exactly the same. The skill duplicates
 last week's design, renames the parashah, and pulls this week's זמנים (candle lighting / mincha / Havdalah)
-from the bundled yearly luach (`references/zmanim-5786.md`) instead of asking. It only asks about the
-genuinely variable things (shiurim/kiddush, the green arrow, molad on מברכין weeks).
+from the bundled yearly luach (`references/zmanim-5787.md`) instead of asking. It only asks about the
+genuinely variable things (shiurim/kiddush, the green arrow).
 
 ## Name the conversation after the parashah (do this first)
 The gabbai wants each of these conversations to be titled after the parashah + Hebrew year,
-e.g. `ואתחנן תשפ"ו`. There is **no tool to rename a Claude conversation** — the title is
+e.g. `ואתחנן תשפ"ז`. There is **no tool to rename a Claude conversation** — the title is
 auto-generated from the conversation's content. So the reliable way to steer it: **open your
 very first reply with a clear standalone line in that exact form** before anything else, e.g.
 
-> **פרשת ואתחנן תשפ"ו**
+> **פרשת ואתחנן תשפ"ז**
 
 Use the parashah name the user gave (or, if not yet known, the one you'll duplicate/rename to)
 plus the current Hebrew year in `תשפ"<X>` form. The auto-titler picks this up, producing a title
-like "פרשת ואתחנן תשפ״ו". Exact punctuation is up to the app and may vary
-(`ואתחנן תשפ"ו` / `ואתחנן תשפו`) — that's fine.
+like "פרשת ואתחנן תשפ״ז". Exact punctuation is up to the app and may vary
+(`ואתחנן תשפ"ז` / `ואתחנן תשפז`) — that's fine.
 
 ## The flow (do it in this order)
 
@@ -41,23 +41,26 @@ which parashah this is for. Then `start-editing-transaction` on the copy and `pe
 
 ### 3. Look up the זמנים (don't ask), then ask only about the rest
 The three times that change every week come from the bundled yearly luach — **look them up, don't ask**:
-- Open **`references/zmanim-5786.md`** and find the row for this week's parashah (match by name; two-parashah
+- Open **`references/zmanim-5787.md`** and find the row for this week's parashah (match by name; two-parashah
   weeks use the combined name, e.g. `מטות מסעי`).
 - From that row take **הדלקת נרות** (candle lighting) and **צאת שבת** (Havdalah). **מנחה** is already
   computed in the table (rule: הדלקת נרות + 20 min, rounded to the nearest 5). The candle/tzet values are the
   luach's big central "כניסת/יציאת השבת" numbers — the ones משכן שלום actually prints (verified against past
   bulletins), not the תל אביב/ירושלים strip.
-- The row also gives the **special-Shabbat label** (e.g. `שבת חזון`) for the heading line, and flags
-  **מברכין** weeks.
-- Note the table covers **תשפ"ו only** (through אלול ≈ Sept 2026). If the parashah isn't found (next Hebrew
-  year, or an unusual week), fall back to asking the gabbai for the three times.
+- The row also gives the **special-Shabbat label** (e.g. `שבת חזון`) for the heading line, flags
+  **מברכין** weeks, and — on מברכין weeks — carries the **molad text** ready to print (e.g.
+  `יום ראשון 9:43 ו-2 חלקים`), so you don't need to ask for it.
+- The table covers **תשפ"ז** (ר"ה ספט' 2026 → נצבים־וילך ספט' 2027), plus the first four שבתות of תשפ"ח
+  in a second table at the bottom. If the parashah isn't found (later year, or an unusual week), fall back
+  to asking the gabbai for the three times.
+- Times already account for the clock change (שעון חורף from 25/10/2026, שעון קיץ from 26/03/2027).
 
 State the three times you found so the gabbai can eyeball them, and ask **only** about what genuinely varies
 week to week (use the question/answer tool if available so it's quick):
 - Anything else changing this week — add/remove a shiur or kiddush, a different דבר תורה speaker, etc.
 - The **green arrow** — keep / move to another row / remove (see "Saved assets").
-- If it's a **מברכין** week, ask for the **molad** text to print (and keep the מברכין heading); otherwise
-  drop "מברכין" from the heading and delete the molad line.
+- If it's a **מברכין** week, keep the מברכין heading and print the molad from the table (state it so the
+  gabbai can eyeball it); otherwise drop "מברכין" from the heading and delete the molad line.
 
 Don't proceed to commit until you've confirmed the times and gathered any changes.
 
@@ -95,8 +98,8 @@ labels/times text elements.
 ## Notes / gotchas
 - **Shabbat Mevarchin**: last week's heading may include "מברכין" (the Shabbat that blesses the new
   month) plus a molad line. Most weeks aren't Mevarchin, so when you swap the name also drop "מברכין"
-  (e.g. `מברכין פרשת קרח` → `פרשת חקת`) and ask the user whether to delete the molad line. If this week
-  IS Mevarchin, ask the user for the molad text to print.
+  (e.g. `מברכין פרשת קרח` → `פרשת חקת`) and delete the molad line. If this week IS Mevarchin, take the
+  molad straight from the מולד column of the zmanim table — don't ask the gabbai for it.
 - Hebrew is right-to-left — rely on element IDs and `find_and_replace_text`, not character positions.
 - Operations on `is_responsive` pages are limited to `update_title`, `replace_text`, `update_fill`,
   `delete_element`, `find_and_replace_text`. Check the `is_responsive` flag in the transaction response.
@@ -105,12 +108,12 @@ labels/times text elements.
 
 ## Example
 **User:** "שכפל את הלוז של קרח ותכין לי לפרשת חקת"
-1. `search-designs` "קרח" → `פרשת קרח תשפ"ו`; `copy-design`.
-2. `start-editing-transaction` → `perform-editing-operations`: `update_title` → `פרשת חקת תשפ"ו`;
+1. `search-designs` "קרח" → `פרשת קרח תשפ"ז`; `copy-design`.
+2. `start-editing-transaction` → `perform-editing-operations`: `update_title` → `פרשת חקת תשפ"ז`;
    heading `מברכין פרשת קרח` → `פרשת חקת` (חקת isn't מברכין, so drop the מברכין prefix).
-3. Look up `חקת` in `references/zmanim-5786.md` → הדלקת נרות 19:19, מנחה 19:40, צאת שבת 20:30, no special
-   label. Tell the gabbai those three times and ask only: "יש עוד שינוי השבוע? והחץ הירוק — להשאיר/להזיז/להסיר?
-   ולמחוק את שורת המולד?" (חקת isn't מברכין → default to deleting the molad line).
-   User: "רק תמחק את המולד."
+3. Look up `חקת` in `references/zmanim-5787.md` → הדלקת נרות 19:20, מנחה 19:40, צאת שבת 20:31, no special
+   label, not מברכין. Tell the gabbai those three times and ask only: "יש עוד שינוי השבוע? והחץ הירוק —
+   להשאיר/להזיז/להסיר?" (חקת isn't מברכין → the molad line gets deleted).
+   User: "רק תשאיר את החץ איפה שהוא."
 4. Apply (find/replace the three times from the table, delete the molad element), show the thumbnail,
    confirm, `commit-editing-transaction`, hand over the edit link.
