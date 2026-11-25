@@ -1,6 +1,6 @@
 ---
 name: luz-parasha
-description: Create the weekly synagogue (shul) Shabbat schedule ("לו״ז"/"לוז הפרשה") in Canva by duplicating last week's parashah design, swapping the parashah name, and then asking the user for the rest of the details. Use this whenever the user — typically a gabbai (גבאי) — wants to make next week's bulletin/schedule, says things like "תכין את הלוז של השבוע", "שכפל את לוז הפרשה הקודמת", "צריך את הלוז לפרשת X", or "make this week's parasha schedule". Trigger even if Canva isn't explicitly named.
+description: Create the weekly synagogue (shul) Shabbat schedule ("לו״ז"/"לוז הפרשה") in Canva by duplicating last week's parashah design, swapping the parashah name, asking the user for the rest of the details, and filing it in the shul's year folder. Use this whenever the user — typically a gabbai (גבאי) — wants to make next week's bulletin/schedule, says things like "תכין את הלוז של השבוע", "שכפל את לוז הפרשה הקודמת", "צריך את הלוז לפרשת X", or "make this week's parasha schedule". Trigger even if Canva isn't explicitly named.
 ---
 
 # Shul Parashah Schedule (weekly Canva bulletin)
@@ -10,7 +10,8 @@ This skill automates the recurring job of a synagogue gabbai: take last week's p
 fonts, community names, dedications, fixed prayer times — stays exactly the same. The skill duplicates
 last week's design, renames the parashah, and pulls this week's זמנים (candle lighting / mincha / Havdalah)
 from the bundled yearly luach (`references/zmanim-5787.md`) instead of asking. It only asks about the
-genuinely variable things (shiurim/kiddush, the green arrow).
+genuinely variable things (shiurim/kiddush, the green arrow). At the end it files the new design in the
+shul's folder for the current Hebrew year (e.g. `משכן שלום/תשפז`).
 
 ## Name the conversation after the parashah (do this first)
 The gabbai wants each of these conversations to be titled after the parashah + Hebrew year,
@@ -67,7 +68,35 @@ Don't proceed to commit until you've confirmed the times and gathered any change
 ### 4. Apply the answers, show, confirm, commit
 Apply all the user's values with `perform-editing-operations`, then show the returned thumbnail so the
 gabbai can eyeball it. Changes are draft-only until `commit-editing-transaction` — nothing is saved
-before that. After committing, hand over the design's `edit_url`.
+before that.
+
+### 5. File the design in the shul's year folder
+After committing, move the new design into `<shul folder>/<year folder>` with `move-item-to-folder`
+(`item_id` = the new design's `design_id`). Do this after the commit, so an abandoned draft copy never
+lands in the archive. Don't ask — just do it and mention where it went.
+
+**Folder layout in Canva** (top level → shul → Hebrew year). Year folders are named **without
+gershayim**: `תשפד`, `תשפו`, `תשפז`, … (not `תשפ"ז`).
+
+Known folder IDs (use directly; if a move fails with "not found", re-resolve by name as below):
+- `משכן שלום` → `FAHZvKBvNLg`
+  - `תשפז` → `FAHZvOOUtz0`
+  - `תשפו` → `FAHEfqqxZSc`
+  - `תשפד` → `FAFNU2YdWSU`
+
+Resolving a folder that isn't listed above:
+1. Pick the shul from the design: משכן שלום by default; היכל רחמים if the bulletin is for היכל רחמים.
+2. Find the shul folder with `search-folders` (query = shul name). If the shul folder doesn't exist
+   (e.g. היכל רחמים has none yet), ask the gabbai once whether to create it at the top level
+   (`create-folder`, `parent_folder_id: "root"`).
+3. `list-folder-items` on the shul folder (`item_types: ["folder"]`) and find the year folder matching the
+   design's year (strip the gershayim: `תשפ"ח` → `תשפח`). If it's missing — e.g. the first bulletin of a new
+   year — create it with `create-folder` under the shul folder without asking, then move the design in.
+
+Then hand over the design's `edit_url` and say in one line which folder it was filed in.
+
+The same filing applies to one-off bulletins/announcements built from this template (חגים, מודעות):
+file them in the shul's folder for the year they belong to.
 
 ## How the design is built (important for editing)
 Labels and times live in **separate text elements**, aligned line-by-line. For example the
@@ -105,6 +134,7 @@ labels/times text elements.
   `delete_element`, `find_and_replace_text`. Check the `is_responsive` flag in the transaction response.
 - Watch for trailing spaces inside text lines when doing find/replace (the source often has them).
 - Don't change the fixed prayer times, community names, or dedications unless the user asks.
+- Year folders have no gershayim (`תשפז`), even though design titles do (`תשפ"ז`).
 
 ## Example
 **User:** "שכפל את הלוז של קרח ותכין לי לפרשת חקת"
@@ -116,4 +146,6 @@ labels/times text elements.
    להשאיר/להזיז/להסיר?" (חקת isn't מברכין → the molad line gets deleted).
    User: "רק תשאיר את החץ איפה שהוא."
 4. Apply (find/replace the three times from the table, delete the molad element), show the thumbnail,
-   confirm, `commit-editing-transaction`, hand over the edit link.
+   confirm, `commit-editing-transaction`.
+5. `move-item-to-folder` → `FAHZvOOUtz0` (משכן שלום/תשפז), hand over the edit link:
+   "נשמר בתיקייה משכן שלום/תשפז."
