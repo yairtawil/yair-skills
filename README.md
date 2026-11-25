@@ -1,4 +1,4 @@
-# claude-skills
+# yair-skills
 
 Personal [Claude Code](https://code.claude.com/docs/en/skills) skills, kept in
 one place so they can be installed on any machine and shared with others.
@@ -6,8 +6,8 @@ one place so they can be installed on any machine and shared with others.
 ## Install
 
 ```bash
-git clone https://github.com/USERNAME/claude-skills.git ~/dev/claude-skills
-cd ~/dev/claude-skills
+git clone https://github.com/yairtawil/yair-skills.git ~/dev/yair-skills
+cd ~/dev/yair-skills
 ./install.sh
 ```
 
@@ -35,16 +35,24 @@ commit it to that repo's `.claude/skills/` and everyone on the team gets it.
 ## Repo layout
 
 ```
-claude-skills/
+yair-skills/
 ├── install.sh
 ├── README.md
 └── skills/
-    ├── hello-example/
-    │   └── SKILL.md
-    └── luz-parasha/
+    ├── co-via-changes/
+    ├── commit/
+    ├── donations-sync/
+    ├── go-ahead/
+    ├── luz-parasha/
+    │   ├── SKILL.md
+    │   └── references/
+    │       └── zmanim-5787.md
+    ├── review-slack-prs/
+    ├── skills-repo-sync/
+    └── water-electric-bill/
         ├── SKILL.md
-        └── references/
-            └── zmanim-5786.md
+        └── scripts/
+            └── calc.py
 ```
 
 Each directory under `skills/` is one skill. The directory name becomes the
